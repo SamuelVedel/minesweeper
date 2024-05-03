@@ -114,13 +114,13 @@ void print_grid(int x, int y) {
 		}
 		printf("│");
 	}
-	move_cursor(start_x, start_y+n_columns+1);
+	move_cursor(start_x, start_y+n_lines+1);
 	printf("└");
 	for (int i = 0; i < n_columns*3; ++i) printf("─");
 	printf("┘");
-	move_cursor(start_x, start_y+n_columns+2);
+	move_cursor(start_x, start_y+n_lines+2);
 	printf("%sF%s : %d/%d\n", BOLD_RED, WHITE, n_flags, n_mines);
-	move_cursor(start_x, start_y+n_columns+3);
+	move_cursor(start_x, start_y+n_lines+3);
 }
 
 /**
