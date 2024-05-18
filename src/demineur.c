@@ -40,9 +40,59 @@ int shell_columns = 0;
 /** 0 si le jeux n'est pas terminé */
 int ended = 0;
 
+void check(int x, int y, int first_check);
+
 void move_cursor(int x, int y) {
 	printf("\033[%d;%dH", y, x);
 }
+
+int get_n_mines_around(int x, int y) {
+	int num = 0;
+	for (int iy = y-1; iy <= y+1; ++iy) {
+		for (int ix = x-1; ix <= x+1; ++ix) {
+			if (ix >= 0 && ix < n_columns && iy >=0 && iy < n_lines
+				&& (ix != x || iy != y)) {
+				enum gcase gc = grid[iy][ix];
+				if (gc == MINE_HIDE || gc == MINE_FOUND || gc == MINE_FLAG) {
+					++num;
+				}
+			}
+		}
+	}
+	return num;
+}
+
+int get_n_flags_around(int x, int y) {
+	int num = 0;
+	for (int iy = y-1; iy <= y+1; ++iy) {
+		for (int ix = x-1; ix <= x+1; ++ix) {
+			if (ix >= 0 && ix < n_columns && iy >=0 && iy < n_lines
+				&& (ix != x || iy != y)) {
+				enum gcase gc = grid[iy][ix];
+				if (gc == NOTHING_FLAG || gc == MINE_FLAG) {
+					++num;
+				}
+			}
+		}
+	}
+	return num;
+}
+
+/*int get_n_nothing_found_around(int x, int y) {
+	int num = 0;
+	for (int iy = y-1; iy <= y+1; ++iy) {
+		for (int ix = x-1; ix <= x+1; ++ix) {
+			if (ix >= 0 && ix < n_columns && iy >=0 && iy < n_lines
+				&& (ix != x || iy != y)) {
+				enum gcase gc = grid[iy][ix];
+				if (gc == NOTHING_FOUND) {
+					++num;
+				}
+			}
+		}
+	}
+	return num;
+}*/
 
 /**
  * retourne le caractère selon lequel la case de
@@ -52,15 +102,7 @@ char get_case_char(int x, int y) {
 	enum gcase cas = grid[y][x];
 
 	if (cas == NOTHING_FOUND) {
-		int num = 0;
-		for (int iy = y-1; iy <= y+1; ++iy) {
-			for (int ix = x-1; ix <= x+1; ++ix) {
-				if (ix >= 0 && ix < n_columns && iy >=0 && iy < n_lines) {
-					enum gcase gc = grid[iy][ix];
-					if (gc == MINE_HIDE || gc == MINE_FOUND || gc == MINE_FLAG) ++num;
-				}
-			}
-		}
+		int num = get_n_mines_around(x, y);
 		if (num > 0) return '0'+num;
 		return ' ';
 	}
@@ -188,30 +230,40 @@ void end() {
 	ended = 1;
 }
 
+void check_around(int x, int y) {
+	for (int iy = y-1; iy <= y+1; ++iy) {
+		for (int ix = x-1; ix <= x+1; ++ix) {
+			if (ix >= 0 && ix < n_columns && iy >=0 && iy < n_lines
+				&& (ix != x || iy != y)) {
+				check(ix, iy, 0);
+			}
+		}
+	}
+}
+
 /**
  * regarde si la case x y
  * est une mine ou non
  * est agit en conséquence
  */
-void check(int x, int y) {
+void check(int x, int y, int first_check) {
 	if (grid[0][0] == NOT_DEFINED) init_grid(x, y);
 	enum gcase cas = grid[y][x];
 	if (cas == MINE_HIDE) {
 		show_mine();
 		printf("t'est stupide");
 		end();
-	}
-	if (cas == NOTHING_HIDE) {
+	} else if (cas == NOTHING_HIDE) {
 		grid[y][x] = NOTHING_FOUND;
-
-		if (get_case_char(x, y) == ' ') {
-			for (int iy = y-1; iy <= y+1; ++iy) {
-				for (int ix = x-1; ix <= x+1; ++ix) {
-					if (ix >= 0 && ix < n_columns && iy >=0 && iy < n_lines) {
-						check(ix, iy);
-					}
-				}
-			}
+		if (get_n_mines_around(x, y) == 0) {
+			check_around(x, y);
+		}
+	} else if (cas == NOTHING_FOUND && first_check) {
+		printf("%d %d\n", x, y);
+		int n_mines = get_n_mines_around(x, y);
+		int n_flags = get_n_flags_around(x, y);
+		if (n_mines <= n_flags) {
+			check_around(x, y);
 		}
 	}
 }
@@ -260,7 +312,7 @@ void action(int* x, int* y, char* input) {
 			put_flag(*x, *y);
 			break;
 		case 'c' : // check
-			check(*x, *y);
+			check(*x, *y, 1);
 			break;
 		}
 
