@@ -259,7 +259,6 @@ void check(int x, int y, int first_check) {
 			check_around(x, y);
 		}
 	} else if (cas == NOTHING_FOUND && first_check) {
-		printf("%d %d\n", x, y);
 		int n_mines = get_n_mines_around(x, y);
 		int n_flags = get_n_flags_around(x, y);
 		if (n_mines <= n_flags) {
