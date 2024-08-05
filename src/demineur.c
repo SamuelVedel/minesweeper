@@ -11,6 +11,7 @@
 #define WHITE "\033[00m"
 #define BOLD_GREEN "\033[32;01m"
 #define BOLD_RED "\033[31;01m"
+#define BOLD_YELLOW "\033[33;01m"
 
 /**
  * énumération des différents états
@@ -18,8 +19,8 @@
  * les cases du jeu
  */
 enum gcase {
-	NOTHING_HIDE, NOTHING_FOUND, NOTHING_FLAG,
-	MINE_HIDE, MINE_FOUND, MINE_FLAG,
+	NOTHING_HIDE, NOTHING_FOUND, NOTHING_FLAG, NOTHING_WONDERING,
+	MINE_HIDE, MINE_FOUND, MINE_FLAG, MINE_WONDERING,
 	NOT_DEFINED
 };
 
@@ -46,6 +47,14 @@ void move_cursor(int x, int y) {
 	printf("\033[%d;%dH", y, x);
 }
 
+int is_mine(enum gcase gc) {
+	return gc == MINE_HIDE || gc == MINE_FOUND || gc == MINE_FLAG || gc == MINE_WONDERING;
+}
+
+int is_flag(enum gcase gc) {
+	return gc == NOTHING_FLAG || gc == MINE_FLAG;
+}
+
 int get_n_mines_around(int x, int y) {
 	int num = 0;
 	for (int iy = y-1; iy <= y+1; ++iy) {
@@ -53,7 +62,7 @@ int get_n_mines_around(int x, int y) {
 			if (ix >= 0 && ix < n_columns && iy >=0 && iy < n_lines
 				&& (ix != x || iy != y)) {
 				enum gcase gc = grid[iy][ix];
-				if (gc == MINE_HIDE || gc == MINE_FOUND || gc == MINE_FLAG) {
+				if (is_mine(gc)) {
 					++num;
 				}
 			}
@@ -69,7 +78,7 @@ int get_n_flags_around(int x, int y) {
 			if (ix >= 0 && ix < n_columns && iy >=0 && iy < n_lines
 				&& (ix != x || iy != y)) {
 				enum gcase gc = grid[iy][ix];
-				if (gc == NOTHING_FLAG || gc == MINE_FLAG) {
+				if (is_flag(gc)) {
 					++num;
 				}
 			}
@@ -112,12 +121,16 @@ char get_case_char(int x, int y) {
 		return '.';
 	case NOTHING_FLAG :
 		return 'F';
+	case NOTHING_WONDERING:
+		return '?';
 	case MINE_HIDE :
 		return '.';
 	case MINE_FOUND :
 		return 'x';
 	case MINE_FLAG :
 		return 'F';
+	case MINE_WONDERING:
+		return '?';
 	case NOT_DEFINED :
 		return '.';
 	default :
@@ -147,6 +160,7 @@ void print_grid(int x, int y) {
 			char color[20] = "";
 			if (ch == 'F' || ch == 'x') strcpy(color, BOLD_RED);
 			if (ch >= '1' && ch <= '9') strcpy(color, BOLD_GREEN);
+			if (ch == '?') strcpy(color, BOLD_YELLOW);
 			
 			if (ix == x && iy == y) {
 				printf("|%s%c%s|", color, ch, WHITE);
@@ -191,7 +205,7 @@ void init_grid(int x, int y) {
 }
 
 /**
- * pose un drapeau si x y correspond
+ * pose ou enlève un drapeau si x y correspond
  * à une case cachée
  */
 void put_flag(int x, int y) {
@@ -213,12 +227,31 @@ void put_flag(int x, int y) {
 }
 
 /**
+ * pose en enlève un drapeau d'incertitude si x y correspond
+ * à une case cachée
+ */
+void put_wondering(int x, int y) {
+	if (grid[0][0] != NOT_DEFINED) {
+		if (grid[y][x] == NOTHING_HIDE) {
+			grid[y][x] = NOTHING_WONDERING;
+		} else if (grid[y][x] == MINE_HIDE) {
+			grid[y][x] = MINE_WONDERING;
+		} else if (grid[y][x] == NOTHING_WONDERING) {
+			grid[y][x] = NOTHING_HIDE;
+		} else if (grid[y][x] == MINE_WONDERING) {
+			grid[y][x] = MINE_HIDE;
+		}
+	}
+}
+
+/**
  * affiche toutes les mines
  */
 void show_mine() {
 	for (int iy = 0; iy < n_lines; ++iy) {
 		for (int ix = 0; ix < n_columns; ++ix) {
-			if (grid[iy][ix] == MINE_HIDE || grid[iy][ix] == MINE_FLAG) {
+			if (grid[iy][ix] == MINE_HIDE || grid[iy][ix] == MINE_FLAG
+				|| grid[iy][ix] == MINE_WONDERING) {
 				grid[iy][ix] = MINE_FOUND;
 			}
 		}
@@ -309,6 +342,9 @@ void action(int* x, int* y, char* input) {
 			break;
 		case 'f' : // flag
 			put_flag(*x, *y);
+			break;
+		case 'w' : // wondering
+			put_wondering(*x, *y);
 			break;
 		case 'c' : // check
 			check(*x, *y, 1);
