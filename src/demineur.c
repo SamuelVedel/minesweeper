@@ -321,32 +321,57 @@ void is_won() {
 	}
 }
 
+char convert_arrow_char(char arrow) {
+	switch (arrow) {
+	case 'C':
+		return 'd';
+	case 'B':
+		return 's';
+	case 'D':
+		return 'q';
+	case 'A':
+		return 'z';
+	}
+	return arrow;
+}
+
 /**
  * effectue les action en fonciotn des inputs
  */
 void action(int* x, int* y, char* input) {
 	int i = 0;
 	while (input[i] != 0) {
+		if (input[i] == '\033') {
+			getchar();
+			input[i] = convert_arrow_char(getchar());
+		}
 		switch (input[i]) {
-		case 'd' : // droite
+		case 'd': // droite
+		case 'D':
 			*x += 1;
 			break;
-		case 's' : // bas
+		case 's': // bas
+		case 'S':
 			*y += 1;
 			break;
-		case 'q' : // gauche
+		case 'q': // gauche
+		case 'Q':
 			*x -= 1;
 			break;
-		case 'z' : // haut
+		case 'z': // haut
+		case 'Z':
 			*y -= 1;
 			break;
-		case 'f' : // flag
+		case 'f': // flag
+		case 'F':
 			put_flag(*x, *y);
 			break;
-		case 'w' : // wondering
+		case 'w': // wondering
+		case 'W':
 			put_wondering(*x, *y);
 			break;
-		case 'c' : // check
+		case 'c': // check
+		case 'C':
 			check(*x, *y, 1);
 			break;
 		}
