@@ -24,6 +24,12 @@ enum gcase {
 	NOT_DEFINED
 };
 
+
+char explanations[] = "\033[00;01mc\033[00m: check; \
+\033[00;01mf\033[00m: flag; \033[00;01mw\033[00m: wondering; \
+move \033[00;01mzqsd\033[00m or \033[00;01m↑←↓→\033[00m";
+int explanations_size = 50;
+
 /** nombre de mine */
 int n_mines = /*40*/160;
 /** nombre de drapeau posés */
@@ -174,8 +180,10 @@ void print_grid(int x, int y) {
 	printf("└");
 	for (int i = 0; i < n_columns*3; ++i) printf("─");
 	printf("┘");
-	move_cursor(start_x, start_y+n_lines+2);
+	move_cursor(start_x, start_y+grid_h);
 	printf("%sF%s : %d/%d\n", BOLD_RED, WHITE, n_flags, n_mines);
+	move_cursor(start_x+grid_w-explanations_size, start_y+grid_h);
+	printf("%s", explanations);
 	move_cursor(start_x, start_y+n_lines+3);
 }
 
