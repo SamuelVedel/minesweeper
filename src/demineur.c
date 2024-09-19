@@ -346,51 +346,47 @@ char convert_arrow_char(char arrow) {
 /**
  * effectue les action en fonciotn des inputs
  */
-void action(int* x, int* y, char* input) {
-	int i = 0;
-	while (input[i] != 0) {
-		if (input[i] == '\033') {
-			getchar();
-			input[i] = convert_arrow_char(getchar());
-		}
-		switch (input[i]) {
-		case 'd': // droite
-		case 'D':
-			*x += 1;
-			break;
-		case 's': // bas
-		case 'S':
-			*y += 1;
-			break;
-		case 'q': // gauche
-		case 'Q':
-			*x -= 1;
-			break;
-		case 'z': // haut
-		case 'Z':
-			*y -= 1;
-			break;
-		case 'f': // flag
-		case 'F':
-			put_flag(*x, *y);
-			break;
-		case 'w': // wondering
-		case 'W':
-			put_wondering(*x, *y);
-			break;
-		case 'c': // check
-		case 'C':
-			check(*x, *y, 1);
-			break;
-		}
-
-		// on évite de sortir de la grille
-		if (*x < 0) *x = 0;
-		if (*x >= n_columns) *x = n_columns -1;
-		if (*y < 0) *y = 0;
-		if (*y >= n_lines) *y = n_lines-1;
-		++i;
+void action(int* x, int* y, char input) {
+	if (input == '\033') {
+		getchar();
+		input = convert_arrow_char(getchar());
 	}
+	switch (input) {
+	case 'd': // droite
+	case 'D':
+		*x += 1;
+		break;
+	case 's': // bas
+	case 'S':
+		*y += 1;
+		break;
+	case 'q': // gauche
+	case 'Q':
+		*x -= 1;
+		break;
+	case 'z': // haut
+	case 'Z':
+		*y -= 1;
+		break;
+	case 'f': // flag
+	case 'F':
+		put_flag(*x, *y);
+		break;
+	case 'w': // wondering
+	case 'W':
+		put_wondering(*x, *y);
+		break;
+	case 'c': // check
+	case 'C':
+		check(*x, *y, 1);
+		break;
+	}
+
+	// on évite de sortir de la grille
+	if (*x < 0) *x = 0;
+	if (*x >= n_columns) *x = n_columns -1;
+	if (*y < 0) *y = 0;
+	if (*y >= n_lines) *y = n_lines-1;
 	is_won();
 }
 
@@ -420,17 +416,17 @@ int main(int argc, char* argv[]) {
 	int y = (n_lines-1)/2;
 	char input = 0;
 	system("/bin/stty raw");
+	//system("/bin/stty raw -echo");
 	
 	while (input != '.' && !ended) {
 		system("clear");
 		print_grid(x, y);
-		char inp[50] = {};
 		input = getchar();
-		inp[0] = input;
-		action(&x, &y, inp);
+		action(&x, &y, input);
 	}
 	
 	system("/bin/stty cooked");
+	//system("/bin/stty cooked -echo");
 	printf("\n");
 	return 0;
 }
