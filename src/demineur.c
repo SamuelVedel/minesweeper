@@ -197,7 +197,7 @@ void init_grid(int x, int y) {
 		int x2 = rand()%(n_columns);
 		int y2 = rand()%(n_lines);
 
-		if ((x2 != x || y2 != y) && grid[y2][x2] == NOTHING_HIDE) {
+		if ((abs(x2-x) > 1 || abs(y2-y) > 1) && grid[y2][x2] == NOTHING_HIDE) {
 			grid[y2][x2] = MINE_HIDE;
 			--i;
 		}
@@ -284,7 +284,7 @@ void check(int x, int y, int first_check) {
 	enum gcase cas = grid[y][x];
 	if (cas == MINE_HIDE) {
 		show_mine();
-		printf("t'est stupide");
+		printf("t'es stupide");
 		end();
 	} else if (cas == NOTHING_HIDE) {
 		grid[y][x] = NOTHING_FOUND;
