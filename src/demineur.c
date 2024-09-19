@@ -8,7 +8,17 @@
 #define N_COLUMNS_MAX 50
 #define N_LINES_MAX 50
 
+#define RIGHT_KEY 'd'
+#define DOWN_KEY 's'
+#define LEFT_KEY 'q'
+#define UP_KEY 'z'
+#define CHECK_KEY 'c'
+#define FLAG_KEY 'f'
+#define WONDER_KEY 'w'
+#define EXIT_KEY '.'
+
 #define WHITE "\033[00m"
+#define WHITE_BOLD "\033[00;01m"
 #define BOLD_GREEN "\033[32;01m"
 #define BOLD_RED "\033[31;01m"
 #define BOLD_YELLOW "\033[33;01m"
@@ -25,10 +35,8 @@ enum gcase {
 };
 
 
-char explanations[] = "\033[00;01mc\033[00m: check; \
-\033[00;01mf\033[00m: flag; \033[00;01mw\033[00m: wondering; \
-move \033[00;01mzqsd\033[00m or \033[00;01m↑←↓→\033[00m";
-int explanations_size = 50;
+char explanations[146] = {};
+int explanations_size = 59;
 
 /** nombre de mine */
 int n_mines = /*40*/160;
@@ -48,6 +56,17 @@ int shell_columns = 0;
 int ended = 0;
 
 void check(int x, int y, int first_check);
+
+void init_explanation() {
+	sprintf(explanations, "%s%c%s: check; %s%c%s: flag; %s%c%s: wondering; move \
+%s%c%c%c%c%s or %s↑←↓→%s; %s%c%s: exit",
+			WHITE_BOLD, CHECK_KEY, WHITE,
+			WHITE_BOLD, FLAG_KEY, WHITE,
+			WHITE_BOLD, WONDER_KEY, WHITE,
+			WHITE_BOLD, UP_KEY, LEFT_KEY, DOWN_KEY, RIGHT_KEY, WHITE,
+			WHITE_BOLD, WHITE,
+			WHITE_BOLD, EXIT_KEY, WHITE);
+}
 
 void move_cursor(int x, int y) {
 	printf("\033[%d;%dH", y, x);
@@ -332,13 +351,13 @@ void is_won() {
 char convert_arrow_char(char arrow) {
 	switch (arrow) {
 	case 'C':
-		return 'd';
+		return RIGHT_KEY;
 	case 'B':
-		return 's';
+		return DOWN_KEY;
 	case 'D':
-		return 'q';
+		return LEFT_KEY;
 	case 'A':
-		return 'z';
+		return UP_KEY;
 	}
 	return arrow;
 }
@@ -352,32 +371,25 @@ void action(int* x, int* y, char input) {
 		input = convert_arrow_char(getchar());
 	}
 	switch (input) {
-	case 'd': // droite
-	case 'D':
+	case RIGHT_KEY: // droite
 		*x += 1;
 		break;
-	case 's': // bas
-	case 'S':
+	case DOWN_KEY: // bas
 		*y += 1;
 		break;
-	case 'q': // gauche
-	case 'Q':
+	case LEFT_KEY: // gauche
 		*x -= 1;
 		break;
-	case 'z': // haut
-	case 'Z':
+	case UP_KEY: // haut
 		*y -= 1;
 		break;
-	case 'f': // flag
-	case 'F':
+	case FLAG_KEY: // flag
 		put_flag(*x, *y);
 		break;
-	case 'w': // wondering
-	case 'W':
+	case WONDER_KEY: // wondering
 		put_wondering(*x, *y);
 		break;
-	case 'c': // check
-	case 'C':
+	case CHECK_KEY: // check
 		check(*x, *y, 1);
 		break;
 	}
@@ -411,7 +423,8 @@ int main(int argc, char* argv[]) {
 			exit(1);
 		}
 	}
-
+	
+	init_explanation();
 	int x = (n_columns-1)/2;
 	int y = (n_lines-1)/2;
 	char input = 0;
