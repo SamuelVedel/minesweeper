@@ -274,12 +274,26 @@ void put_wondering(int x, int y) {
 /**
  * affiche toutes les mines
  */
-void show_mine() {
+void show_mines() {
 	for (int iy = 0; iy < n_lines; ++iy) {
 		for (int ix = 0; ix < n_columns; ++ix) {
 			if (grid[iy][ix] == MINE_HIDE || grid[iy][ix] == MINE_FLAG
 				|| grid[iy][ix] == MINE_WONDERING) {
 				grid[iy][ix] = MINE_FOUND;
+			}
+		}
+	}
+	print_grid(-1, -1);
+}
+
+/**
+ * met des drapeaux sur toutes les mines
+ */
+void cover_mines() {
+	for (int iy = 0; iy < n_lines; ++iy) {
+		for (int ix = 0; ix < n_columns; ++ix) {
+			if (grid[iy][ix] == MINE_HIDE || grid[iy][ix] == MINE_WONDERING) {
+				grid[iy][ix] = MINE_FLAG;
 			}
 		}
 	}
@@ -310,7 +324,7 @@ void check(int x, int y, int first_check) {
 	if (grid[0][0] == NOT_DEFINED) init_grid(x, y);
 	enum gcase cas = grid[y][x];
 	if (cas == MINE_HIDE) {
-		show_mine();
+		show_mines();
 		printf("t'es stupide");
 		end();
 	} else if (cas == NOTHING_HIDE) {
@@ -342,6 +356,7 @@ void is_won() {
 		}
 	}
 	if (won) {
+		cover_mines();
 		print_grid(-1, -1);
 		printf("gg bg");
 		end();
