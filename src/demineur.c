@@ -12,7 +12,7 @@
 #define DOWN_KEY 's'
 #define LEFT_KEY 'q'
 #define UP_KEY 'z'
-#define CHECK_KEY 'c'
+#define CHECK_KEY 'm'
 #define FLAG_KEY 'f'
 #define WONDER_KEY 'w'
 #define EXIT_KEY '.'
@@ -172,11 +172,13 @@ void print_grid(int x, int y) {
 	int start_x = shell_columns/2-grid_w/2;
 	int start_y = shell_lines/2-grid_h/2;
 
+	// haut
 	move_cursor(start_x, start_y);
 	printf("┌");
 	for (int i = 0; i < n_columns*3; ++i) printf("─");
 	printf("┐");
 
+	// grille
 	for (int iy = 0; iy < n_lines; ++iy) {
 		move_cursor(start_x, start_y+iy+1);
 		printf("│");
@@ -195,15 +197,19 @@ void print_grid(int x, int y) {
 		}
 		printf("│");
 	}
+	// bas
 	move_cursor(start_x, start_y+n_lines+1);
 	printf("└");
 	for (int i = 0; i < n_columns*3; ++i) printf("─");
 	printf("┘");
-	move_cursor(start_x, start_y+grid_h);
-	printf("%sF%s : %d/%d\n", BOLD_RED, WHITE, n_flags, n_mines);
+	// explication des touches
 	move_cursor(start_x+grid_w-explanations_size, start_y+grid_h);
 	printf("%s", explanations);
+	// nombre de drapeau
+	move_cursor(start_x, start_y+grid_h);
+	printf("%sF%s : %d/%d\n", BOLD_RED, WHITE, n_flags, n_mines);
 	move_cursor(start_x, start_y+n_lines+3);
+
 }
 
 /**
