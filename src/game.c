@@ -19,19 +19,17 @@ struct game_t {
 	int ended;
 };
 
-struct game_t game_init() {
-	struct game_t g = {};
-	g.n_mines = /*40*/160;
-	g.n_flags = 0;
+void game_init(struct game_t *g) {
+	g->n_mines = /*40*/160;
+	g->n_flags = 0;
 	for (int iy = 0; iy < N_LINES_MAX; ++iy) {
 		for (int ix = 0; ix < N_COLUMNS_MAX; ++ix) {
-			g.grid[iy][ix] = NOT_DEFINED;
+			g->grid[iy][ix] = NOT_DEFINED;
 		}
 	}
-	g.n_columns = /*16*/32;
-	g.n_lines = /*16*/32;
-	g.ended = 0;
-	return g;
+	g->n_columns = /*16*/32;
+	g->n_lines = /*16*/32;
+	g->ended = 0;
 }
 
 enum gcase game_get(struct game_t *game, int ix, int iy) {
