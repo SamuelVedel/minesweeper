@@ -12,6 +12,7 @@
 #define FLAG_KEY 'f'
 #define WONDER_KEY 'w'
 #define EXIT_KEY '.'
+#define REFRESH_KEY 'r'
 
 /**
  * énumération des différents états

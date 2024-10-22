@@ -332,6 +332,9 @@ void action(struct game_t *game, char input) {
 	case CHECK_KEY: // check
 		check(game, game->x, game->y, 1);
 		break;
+	case REFRESH_KEY: // refresh
+		display_grid(game);
+		break;
 	}
 
 	// on évite de sortir de la grille
@@ -365,7 +368,6 @@ int main(int argc, char* argv[]) {
 	}
 	
 	display_init(&game);
-	system("clear");
 	display_grid(&game);
 	
 	char input = 0;

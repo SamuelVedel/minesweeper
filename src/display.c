@@ -125,6 +125,13 @@ int display_stack_is_empty() {
 	return stack_size == 0;
 }
 
+/**
+ * Nettoie l'écran
+ */
+void clear_screen() {
+	printf("\e[1;1H\e[2J");
+}
+
 /** bouge le curseur dans la console */
 void move_cursor(int x, int y) {
 	printf("\033[%d;%dH", y, x);
@@ -179,6 +186,7 @@ void print_one_square(struct game_t *game, int x, int y) {
 			
 	if (x == game_x(game) && y == game_y(game)) {
 		printf("|%s%c%s|", color, ch, WHITE);
+		//printf(" %s%c%s ", color, ch, WHITE);
 	} else {
 		printf(" %s%c%s ", color, ch, WHITE);
 	}
@@ -217,6 +225,7 @@ void display_flag_count(struct game_t *game) {
  * réaffiche toute la grille
  */
 void display_grid(struct game_t *game) {
+	clear_screen();
 	get_shell_dimensions();
 	int n_columns = game_n_columns(game);
 	int n_lines = game_n_lines(game);
@@ -257,4 +266,6 @@ void display_update(struct game_t *game) {
 	}
 	display_flag_count(game);
 	move_cursor(grid_x, grid_y+grid_h+1);
+	/*move_cursor(grid_x+game_x(game)*3+2,
+	  grid_y+game_y(game)+1);*/
 }
