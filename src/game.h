@@ -38,4 +38,8 @@ int game_n_flags(struct game_t *game);
 
 int game_n_mines(struct game_t *game);
 
+int game_x(struct game_t *game);
+
+int game_y(struct game_t *game);
+
 #endif

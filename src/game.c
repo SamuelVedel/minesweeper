@@ -17,6 +17,10 @@ struct game_t {
 	int n_lines;
 	/** 0 si le jeux n'est pas terminé */
 	int ended;
+	/** abscisses de l'emplacement du curseur */
+	int x;
+	/** ordonnées de l'emplacement du curseur */
+	int y;
 };
 
 void game_init(struct game_t *g) {
@@ -30,6 +34,8 @@ void game_init(struct game_t *g) {
 	g->n_columns = /*16*/32;
 	g->n_lines = /*16*/32;
 	g->ended = 0;
+	g->x = (g->n_columns-1)/2;
+	g->y = (g->n_lines-1)/2;
 }
 
 enum gcase game_get(struct game_t *game, int ix, int iy) {
@@ -50,6 +56,14 @@ int game_n_flags(struct game_t *game) {
 
 int game_n_mines(struct game_t *game) {
 	return game->n_mines;
+}
+
+int game_x(struct game_t *game) {
+	return game->x;
+}
+
+int game_y(struct game_t *game) {
+	return game->y;
 }
 
 void check(struct game_t *game, int x, int y, int first_check);
@@ -188,7 +202,7 @@ void show_mines(struct game_t *game) {
 			}
 		}
 	}
-	display_grid(game, -1, -1);
+	display_grid(game);
 }
 
 /**
@@ -203,7 +217,7 @@ void cover_mines(struct game_t *game) {
 			}
 		}
 	}
-	display_grid(game, -1, -1);
+	display_grid(game);
 }
 
 void end(struct game_t *game) {
@@ -235,6 +249,7 @@ void check(struct game_t *game, int x, int y, int first_check) {
 		printf("t'es stupide");
 		end(game);
 	} else if (cas == NOTHING_HIDE) {
+		display_stack_add(x, y);
 		game->grid[y][x] = NOTHING_FOUND;
 		if (get_n_mines_around(game, x, y) == 0) {
 			check_around(game, x, y);
@@ -257,14 +272,15 @@ void is_won(struct game_t *game) {
 	int won = 1;
 	for (int iy = 0; iy < game->n_lines; ++iy) {
 		for (int ix = 0; ix < game->n_columns; ++ix) {
-			if (game->grid[iy][ix] == NOTHING_HIDE || game->grid[iy][ix] == NOTHING_FLAG) {
+			if (game->grid[iy][ix] == NOTHING_HIDE || game->grid[iy][ix] == NOTHING_FLAG
+				|| game->grid[iy][ix] == NOT_DEFINED) {
 				won = 0;
 			}
 		}
 	}
 	if (won) {
 		cover_mines(game);
-		display_grid(game, -1, -1);
+		display_grid(game);
 		printf("gg bg");
 		end(game);
 	}
@@ -287,53 +303,56 @@ char convert_arrow_char(char arrow) {
 /**
  * effectue les action en fonciotn des inputs
  */
-void action(struct game_t *game, int* x, int* y, char input) {
+void action(struct game_t *game, char input) {
+	display_stack_add(game->x, game->y);
+	
 	if (input == '\033') {
 		getchar();
 		input = convert_arrow_char(getchar());
 	}
 	switch (input) {
 	case RIGHT_KEY: // droite
-		*x += 1;
+		game->x += 1;
 		break;
 	case DOWN_KEY: // bas
-		*y += 1;
+		game->y += 1;
 		break;
 	case LEFT_KEY: // gauche
-		*x -= 1;
+		game->x -= 1;
 		break;
 	case UP_KEY: // haut
-		*y -= 1;
+		game->y -= 1;
 		break;
 	case FLAG_KEY: // flag
-		put_flag(game, *x, *y);
+		put_flag(game, game->x, game->y);
 		break;
 	case WONDER_KEY: // wondering
-		put_wondering(game, *x, *y);
+		put_wondering(game, game->x, game->y);
 		break;
 	case CHECK_KEY: // check
-		check(game, *x, *y, 1);
+		check(game, game->x, game->y, 1);
 		break;
 	}
 
 	// on évite de sortir de la grille
-	if (*x < 0) *x = 0;
-	if (*x >= game->n_columns) *x = game->n_columns -1;
-	if (*y < 0) *y = 0;
-	if (*y >= game->n_lines) *y = game->n_lines-1;
+	if (game->x < 0) game->x = 0;
+	if (game->x >= game->n_columns) game->x = game->n_columns -1;
+	if (game->y < 0) game->y = 0;
+	if (game->y >= game->n_lines) game->y = game->n_lines-1;
 	is_won(game);
+	
+	display_stack_add(game->x, game->y);
 }
 
 int main(int argc, char* argv[]) {
 	struct game_t game = {};
 	game_init(&game);
-	display_init();
 	
 	if (argc >= 4) {
 		game.n_columns = atoi(argv[1]);
 		game.n_lines = atoi(argv[2]);
 		game.n_mines = atoi(argv[3]);
-
+	
 		if (game.n_mines >= game.n_columns*game.n_lines) {
 			printf("Il y à trop de mines\n");
 			exit(1);
@@ -345,15 +364,16 @@ int main(int argc, char* argv[]) {
 		}
 	}
 	
-	int x = (game.n_columns-1)/2;
-	int y = (game.n_lines-1)/2;
+	display_init(&game);
+	system("clear");
+	display_grid(&game);
+	
 	char input = 0;
 	
 	while (input != '.' && !game.ended) {
-		system("clear");
-		display_grid(&game, x, y);
+		display_update(&game);
 		input = getchar();
-		action(&game, &x, &y, input);
+		action(&game, input);
 	}
 	
 	display_terminate();
