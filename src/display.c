@@ -8,6 +8,8 @@
 
 #define STACK_LENGTH N_COLUMNS_MAX*N_LINES_MAX
 
+#define SQUARE_WIDTH 3 // largeur d'une case dans le terminal
+
 #define WHITE "\033[00m"
 #define WHITE_BOLD "\033[00;01m"
 #define BOLD_GREEN "\033[32;01m"
@@ -56,7 +58,7 @@ void get_grid_dimensions(struct game_t *game) {
 	int n_columns = game_n_columns(game);
 	int n_lines = game_n_lines(game);
 	
-	grid_w = n_columns*3+2;
+	grid_w = n_columns*SQUARE_WIDTH+2;
 	grid_h = n_lines+2;
 }
 
@@ -199,7 +201,7 @@ void print_one_square(struct game_t *game, int x, int y) {
  * au bonne endroit
  */
 void display_one_square(struct game_t *game, int x, int y) {
-	move_cursor(grid_x+1+x*3, grid_y+1+y);
+	move_cursor(grid_x+1+x*SQUARE_WIDTH, grid_y+1+y);
 	print_one_square(game, x, y);
 }
 
@@ -233,7 +235,7 @@ void display_grid(struct game_t *game) {
 	// haut
 	move_cursor(grid_x, grid_y);
 	printf("┌");
-	for (int i = 0; i < n_columns*3; ++i) printf("─");
+	for (int i = 0; i < n_columns*SQUARE_WIDTH; ++i) printf("─");
 	printf("┐");
 
 	// grille
@@ -248,7 +250,7 @@ void display_grid(struct game_t *game) {
 	// bas
 	move_cursor(grid_x, grid_y+n_lines+1);
 	printf("└");
-	for (int i = 0; i < n_columns*3; ++i) printf("─");
+	for (int i = 0; i < n_columns*SQUARE_WIDTH; ++i) printf("─");
 	printf("┘");
 	// explication des touches
 	display_explanation();
@@ -266,6 +268,6 @@ void display_update(struct game_t *game) {
 	}
 	display_flag_count(game);
 	move_cursor(grid_x, grid_y+grid_h+1);
-	/*move_cursor(grid_x+game_x(game)*3+2,
+	/*move_cursor(grid_x+game_x(game)*SQUARE_WIDTH+2,
 	  grid_y+game_y(game)+1);*/
 }
