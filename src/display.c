@@ -20,8 +20,8 @@ int stack[STACK_LENGTH][2] = {};
 size_t stack_size = 0;
 
 /** chaine de caractère d'explication */
-char explanations[146] = {};
-int explanations_size = 59;
+char explanations[171] = {};
+int explanations_size = 71;
 
 /** nombre de lignes dans la console */
 int shell_row = 0;
@@ -40,13 +40,14 @@ int grid_y = 0;
 /** initialise la chaine de caractère d'explication */
 void init_explanation() {
 	sprintf(explanations, "%s%c%s: check; %s%c%s: flag; %s%c%s: wondering; move "
-			"%s%c%c%c%c%s or %s↑←↓→%s; %s%c%s: exit",
+			"%s%c%c%c%c%s or %s↑←↓→%s; %s%c%s: exit; %s%c%s: refresh",
 			WHITE_BOLD, CHECK_KEY, WHITE,
 			WHITE_BOLD, FLAG_KEY, WHITE,
 			WHITE_BOLD, WONDER_KEY, WHITE,
 			WHITE_BOLD, UP_KEY, LEFT_KEY, DOWN_KEY, RIGHT_KEY, WHITE,
 			WHITE_BOLD, WHITE,
-			WHITE_BOLD, EXIT_KEY, WHITE);
+			WHITE_BOLD, EXIT_KEY, WHITE,
+			WHITE_BOLD, REFRESH_KEY, WHITE);
 }
 /**
  * rècupère les dimensions d'affichage
