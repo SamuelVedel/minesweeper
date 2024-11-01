@@ -306,10 +306,13 @@ char convert_arrow_char(char arrow) {
 void action(struct game_t *game, char input) {
 	display_stack_add(game->x, game->y);
 	
-	if (input == '\033') {
+	if (input >= 'A' && input <= 'Z') {
+		input += 'a'-'A';
+	} else if (input == '\033') {
 		getchar();
 		input = convert_arrow_char(getchar());
 	}
+	
 	switch (input) {
 	case RIGHT_KEY: // droite
 		game->x += 1;
