@@ -3,6 +3,8 @@
 #include <string.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
+#include <sys/wait.h>
+#include <errno.h>
 #include "game.h"
 #include "display.h"
 
@@ -129,17 +131,44 @@ void get_shell_dimensions() {
 	get_grid_position();
 }
 
+void exit_if(int condition, const char *prefix) {
+	if (condition) {
+		if ( errno != 0 ) {
+			perror(prefix);
+		}
+		else {
+			fprintf( stderr, "%s\n", prefix );
+		}
+		exit(1);
+	}
+}
+
+void call_cmd(char *cmd, char *arg) {
+	pid_t fork_pid = fork();
+	exit_if(fork_pid == -1, "fork");
+	
+	if (fork_pid == 0) {
+		char *argv[] = {
+			cmd, arg, NULL
+		};
+		execvp(cmd, argv);
+		exit_if(1, "execvp");
+	}
+	exit_if(wait(NULL) == 0, "wait");
+}
 
 void display_init(struct game_t *game) {
 	get_grid_dimensions(game);
 	get_shell_dimensions();
 	init_explanation();
 	
-	system("/bin/stty raw");
+	//system("/bin/stty raw");
+	call_cmd("/bin/stty", "raw");
 }
 
 void display_terminate() {
-	system("/bin/stty cooked");
+	//system("/bin/stty cooked");
+	call_cmd("/bin/stty", "cooked");
 	printf("\n");
 }
 
@@ -163,7 +192,8 @@ int display_stack_is_empty() {
  * Nettoie l'écran
  */
 void clear_screen() {
-	printf("\e[1;1H\e[2J");
+	//printf("\e[1;1H\e[2J");
+	call_cmd("clear", NULL);
 }
 
 /** bouge le curseur dans la console */
