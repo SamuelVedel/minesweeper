@@ -9,19 +9,21 @@
 #define STACK_LENGTH N_COLUMNS_MAX*N_LINES_MAX
 
 #define SQUARE_WIDTH 3 // largeur d'une case dans le terminal
+// taille maximal théorique du décompte des drapeau dans la terminal
+#define MAX_FLAG_COUNT_LEN 11
 
-#define WHITE "\033[00m"
-#define WHITE_BOLD "\033[00;01m"
-#define BOLD_GREEN "\033[32;01m"
-#define BOLD_RED "\033[31;01m"
-#define BOLD_YELLOW "\033[33;01m"
+#define WHITE "\e[00m"
+#define WHITE_BOLD "\e[00;01m"
+#define BOLD_GREEN "\e[32;01m"
+#define BOLD_RED "\e[31;01m"
+#define BOLD_YELLOW "\e[33;01m"
 
 int stack[STACK_LENGTH][2] = {};
 size_t stack_size = 0;
 
 /** chaine de caractère d'explication */
 char explanations[171] = {};
-int explanations_size = 71;
+//int explanations_size = 71;
 
 /** nombre de lignes dans la console */
 int shell_row = 0;
@@ -37,6 +39,33 @@ int grid_x = 0;
 /** ordonnées de début de la grille */
 int grid_y = 0;
 
+/**
+ * Retourne la longueur de la chaine de charactère
+ * d'explication données en paramètres
+ * sans compté ce qui set à l'affichage
+ */
+int explen(char *exp) {
+	int len = 0;
+	int counting = 1;
+	for (;*exp != 0; ++exp) {
+		if (counting) {
+			if (*exp == '\e') {
+				counting = 0;
+				continue;
+			}
+			if ((unsigned char) *exp == 226) {
+				len -= 2;
+			}
+			++len;
+		} else {
+			if (*exp == 'm') {
+				counting = 1;
+			}
+		}
+	}
+	return len;
+}
+
 /** initialise la chaine de caractère d'explication */
 void init_explanation() {
 	sprintf(explanations, "%s%c%s: check; %s%c%s: flag; %s%c%s: wondering; move "
@@ -48,7 +77,9 @@ void init_explanation() {
 			WHITE_BOLD, WHITE,
 			WHITE_BOLD, EXIT_KEY, WHITE,
 			WHITE_BOLD, REFRESH_KEY, WHITE);
+	//explanations_size = explen(explanations);
 }
+
 /**
  * rècupère les dimensions d'affichage
  * de la grille et les stockes dans les variables :
@@ -211,8 +242,13 @@ void display_one_square(struct game_t *game, int x, int y) {
  * au bonne endroit
  */
 void display_explanation() {
-	move_cursor(grid_x+grid_w-explanations_size, grid_y+grid_h);
-	printf("%s", explanations);
+	int explanations_size = explen(explanations);
+	if (explanations_size < grid_w-MAX_FLAG_COUNT_LEN) {
+		move_cursor(grid_x+grid_w-explanations_size, grid_y+grid_h);
+		printf("%s", explanations);
+	} else {
+		
+	}
 }
 
 /**
