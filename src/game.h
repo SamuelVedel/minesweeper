@@ -2,7 +2,7 @@
 #define __GAME_H__
 
 #define N_COLUMNS_MAX 50
-#define N_LINES_MAX 50
+#define N_ROWS_MAX 50
 
 #define RIGHT_KEY 'd'
 #define DOWN_KEY 's'
@@ -33,7 +33,7 @@ int get_n_mines_around(struct game_t *game, int x, int y);
 
 int game_n_columns(struct game_t *game);
 
-int game_n_lines(struct game_t *game);
+int game_n_rows(struct game_t *game);
 
 int game_n_flags(struct game_t *game);
 

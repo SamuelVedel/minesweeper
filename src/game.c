@@ -10,11 +10,11 @@ struct game_t {
 	/** nombre de drapeau posés */
 	int n_flags;
 	/** grille de jeu */
-	enum gcase grid[N_LINES_MAX][N_COLUMNS_MAX];
+	enum gcase grid[N_ROWS_MAX][N_COLUMNS_MAX];
 	/** nombre de colonnes considéré */
 	int n_columns;
 	/** nombre de lignes considéré */
-	int n_lines;
+	int n_rows;
 	/** 0 si le jeux n'est pas terminé */
 	int ended;
 	/** abscisses de l'emplacement du curseur */
@@ -26,16 +26,16 @@ struct game_t {
 void game_init(struct game_t *g) {
 	g->n_mines = /*40*/160;
 	g->n_flags = 0;
-	for (int iy = 0; iy < N_LINES_MAX; ++iy) {
+	for (int iy = 0; iy < N_ROWS_MAX; ++iy) {
 		for (int ix = 0; ix < N_COLUMNS_MAX; ++ix) {
 			g->grid[iy][ix] = NOT_DEFINED;
 		}
 	}
 	g->n_columns = /*16*/32;
-	g->n_lines = /*16*/32;
+	g->n_rows = /*16*/32;
 	g->ended = 0;
 	g->x = (g->n_columns-1)/2;
-	g->y = (g->n_lines-1)/2;
+	g->y = (g->n_rows-1)/2;
 }
 
 enum gcase game_get(struct game_t *game, int ix, int iy) {
@@ -46,8 +46,8 @@ int game_n_columns(struct game_t *game) {
 	return game->n_columns;
 }
 
-int game_n_lines(struct game_t *game) {
-	return game->n_lines;
+int game_n_rows(struct game_t *game) {
+	return game->n_rows;
 }
 
 int game_n_flags(struct game_t *game) {
@@ -80,7 +80,7 @@ int get_n_mines_around(struct game_t *game, int x, int y) {
 	int num = 0;
 	for (int iy = y-1; iy <= y+1; ++iy) {
 		for (int ix = x-1; ix <= x+1; ++ix) {
-			if (ix >= 0 && ix < game->n_columns && iy >=0 && iy < game->n_lines
+			if (ix >= 0 && ix < game->n_columns && iy >=0 && iy < game->n_rows
 				&& (ix != x || iy != y)) {
 				//enum gcase gc = game.grid[iy][ix];
 				enum gcase gc = game_get(game, ix, iy);
@@ -97,7 +97,7 @@ int get_n_flags_around(struct game_t *game, int x, int y) {
 	int num = 0;
 	for (int iy = y-1; iy <= y+1; ++iy) {
 		for (int ix = x-1; ix <= x+1; ++ix) {
-			if (ix >= 0 && ix < game->n_columns && iy >=0 && iy < game->n_lines
+			if (ix >= 0 && ix < game->n_columns && iy >=0 && iy < game->n_rows
 				&& (ix != x || iy != y)) {
 				enum gcase gc = game->grid[iy][ix];
 				if (is_flag(gc)) {
@@ -113,7 +113,7 @@ int get_n_flags_around(struct game_t *game, int x, int y) {
 	int num = 0;
 	for (int iy = y-1; iy <= y+1; ++iy) {
 		for (int ix = x-1; ix <= x+1; ++ix) {
-			if (ix >= 0 && ix < n_columns && iy >=0 && iy < n_lines
+			if (ix >= 0 && ix < n_columns && iy >=0 && iy < n_rows
 				&& (ix != x || iy != y)) {
 				enum gcase gc = grid[iy][ix];
 				if (gc == NOTHING_FOUND) {
@@ -131,7 +131,7 @@ int get_n_flags_around(struct game_t *game, int x, int y) {
  * pas de mine en x y
  */
 void init_grid(struct game_t *game, int x, int y) {
-	for (int iy = 0; iy < game->n_lines; ++iy) {
+	for (int iy = 0; iy < game->n_rows; ++iy) {
 		for (int ix = 0; ix < game->n_columns; ++ix) {
 			game->grid[iy][ix] = NOTHING_HIDE;
 		}
@@ -141,7 +141,7 @@ void init_grid(struct game_t *game, int x, int y) {
 	srand(clock());
 	while (i > 0) {
 		int x2 = rand()%(game->n_columns);
-		int y2 = rand()%(game->n_lines);
+		int y2 = rand()%(game->n_rows);
 
 		if ((abs(x2-x) > 1 || abs(y2-y) > 1) && game->grid[y2][x2] == NOTHING_HIDE) {
 			game->grid[y2][x2] = MINE_HIDE;
@@ -194,7 +194,7 @@ void put_wondering(struct game_t *game, int x, int y) {
  * affiche toutes les mines
  */
 void show_mines(struct game_t *game) {
-	for (int iy = 0; iy < game->n_lines; ++iy) {
+	for (int iy = 0; iy < game->n_rows; ++iy) {
 		for (int ix = 0; ix < game->n_columns; ++ix) {
 			if (game->grid[iy][ix] == MINE_HIDE || game->grid[iy][ix] == MINE_FLAG
 				|| game->grid[iy][ix] == MINE_WONDERING) {
@@ -209,7 +209,7 @@ void show_mines(struct game_t *game) {
  * met des drapeaux sur toutes les mines
  */
 void cover_mines(struct game_t *game) {
-	for (int iy = 0; iy < game->n_lines; ++iy) {
+	for (int iy = 0; iy < game->n_rows; ++iy) {
 		for (int ix = 0; ix < game->n_columns; ++ix) {
 			if (game->grid[iy][ix] == MINE_HIDE
 				|| game->grid[iy][ix] == MINE_WONDERING) {
@@ -227,7 +227,7 @@ void end(struct game_t *game) {
 void check_around(struct game_t *game, int x, int y) {
 	for (int iy = y-1; iy <= y+1; ++iy) {
 		for (int ix = x-1; ix <= x+1; ++ix) {
-			if (ix >= 0 && ix < game->n_columns && iy >=0 && iy < game->n_lines
+			if (ix >= 0 && ix < game->n_columns && iy >=0 && iy < game->n_rows
 				&& (ix != x || iy != y)) {
 				check(game, ix, iy, 0);
 			}
@@ -246,7 +246,7 @@ void check(struct game_t *game, int x, int y, int first_check) {
 	enum gcase cas = game->grid[y][x];
 	if (cas == MINE_HIDE) {
 		show_mines(game);
-		printf("t'es stupide");
+		printf("you're stupid");
 		end(game);
 	} else if (cas == NOTHING_HIDE) {
 		display_stack_add(x, y);
@@ -270,7 +270,7 @@ void check(struct game_t *game, int x, int y, int first_check) {
  */
 void is_won(struct game_t *game) {
 	int won = 1;
-	for (int iy = 0; iy < game->n_lines; ++iy) {
+	for (int iy = 0; iy < game->n_rows; ++iy) {
 		for (int ix = 0; ix < game->n_columns; ++ix) {
 			if (game->grid[iy][ix] == NOTHING_HIDE || game->grid[iy][ix] == NOTHING_FLAG
 				|| game->grid[iy][ix] == NOT_DEFINED) {
@@ -281,7 +281,7 @@ void is_won(struct game_t *game) {
 	if (won) {
 		cover_mines(game);
 		display_grid(game);
-		printf("gg bg");
+		printf("clap clap clap");
 		end(game);
 	}
 }
@@ -344,7 +344,7 @@ void action(struct game_t *game, char input) {
 	if (game->x < 0) game->x = 0;
 	if (game->x >= game->n_columns) game->x = game->n_columns -1;
 	if (game->y < 0) game->y = 0;
-	if (game->y >= game->n_lines) game->y = game->n_lines-1;
+	if (game->y >= game->n_rows) game->y = game->n_rows-1;
 	is_won(game);
 	
 	display_stack_add(game->x, game->y);
@@ -356,16 +356,16 @@ int main(int argc, char* argv[]) {
 	
 	if (argc >= 4) {
 		game.n_columns = atoi(argv[1]);
-		game.n_lines = atoi(argv[2]);
+		game.n_rows = atoi(argv[2]);
 		game.n_mines = atoi(argv[3]);
 	
-		if (game.n_mines >= game.n_columns*game.n_lines) {
-			printf("Il y à trop de mines\n");
+		if (game.n_mines >= game.n_columns*game.n_rows) {
+			printf("There are too many mines\n");
 			exit(1);
 		}
-		if (game.n_columns > N_COLUMNS_MAX || game.n_lines > N_LINES_MAX) {
-			printf("les dimension maximal de la grille sont : %d par %d\n",
-				   N_COLUMNS_MAX, N_LINES_MAX);
+		if (game.n_columns > N_COLUMNS_MAX || game.n_rows > N_ROWS_MAX) {
+			printf("The maximal grid dimensions are: %d by %d\n",
+				   N_COLUMNS_MAX, N_ROWS_MAX);
 			exit(1);
 		}
 	}

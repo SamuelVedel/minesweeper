@@ -8,16 +8,16 @@
 #include "game.h"
 #include "display.h"
 
-#define STACK_LENGTH N_COLUMNS_MAX*N_LINES_MAX
+#define STACK_LENGTH N_COLUMNS_MAX*N_ROWS_MAX
 
 #define SQUARE_WIDTH 3 // largeur d'une case dans le terminal
 // taille maximal théorique du décompte des drapeau dans la terminal
 #define MAX_FLAG_COUNT_LEN 11
 
-#define WHITE "\e[00m"
-#define WHITE_BOLD "\e[00;01m"
-#define BOLD_GREEN "\e[32;01m"
-#define BOLD_RED "\e[31;01m"
+#define WHITE       "\e[00m"
+#define WHITE_BOLD  "\e[00;01m"
+#define BOLD_GREEN  "\e[32;01m"
+#define BOLD_RED    "\e[31;01m"
 #define BOLD_YELLOW "\e[33;01m"
 
 int stack[STACK_LENGTH][2] = {};
@@ -90,10 +90,10 @@ void init_explanation() {
  */
 void get_grid_dimensions(struct game_t *game) {
 	int n_columns = game_n_columns(game);
-	int n_lines = game_n_lines(game);
+	int n_rows = game_n_rows(game);
 	
 	grid_w = n_columns*SQUARE_WIDTH+2;
-	grid_h = n_lines+2;
+	grid_h = n_rows+2;
 }
 
 /**
@@ -125,7 +125,7 @@ void get_grid_position() {
  */
 void get_shell_dimensions() {
 	struct winsize w;
-	ioctl(STDOUT_FILENO, TIOCGWINSZ, & w);
+	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 	shell_row = w.ws_row;
 	shell_col = w.ws_col;
 	get_grid_position();
@@ -297,7 +297,7 @@ void display_grid(struct game_t *game) {
 	clear_screen();
 	get_shell_dimensions();
 	int n_columns = game_n_columns(game);
-	int n_lines = game_n_lines(game);
+	int n_rows = game_n_rows(game);
 
 	// haut
 	move_cursor(grid_x, grid_y);
@@ -306,7 +306,7 @@ void display_grid(struct game_t *game) {
 	printf("┐");
 
 	// grille
-	for (int iy = 0; iy < n_lines; ++iy) {
+	for (int iy = 0; iy < n_rows; ++iy) {
 		move_cursor(grid_x, grid_y+iy+1);
 		printf("│");
 		for (int ix = 0; ix < n_columns; ++ix) {
@@ -315,7 +315,7 @@ void display_grid(struct game_t *game) {
 		printf("│");
 	}
 	// bas
-	move_cursor(grid_x, grid_y+n_lines+1);
+	move_cursor(grid_x, grid_y+n_rows+1);
 	printf("└");
 	for (int i = 0; i < n_columns*SQUARE_WIDTH; ++i) printf("─");
 	printf("┘");
